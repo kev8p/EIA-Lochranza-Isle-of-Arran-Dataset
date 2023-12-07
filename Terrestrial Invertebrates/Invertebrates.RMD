@@ -1,0 +1,238 @@
+---
+title: "Invertebrates.Plots"
+output: html_document
+date: "2023-11-26"
+---
+
+```{r setup, include=FALSE}
+#Comparing Terrestrial Invertebrates
+
+install.packages("ggplot2")
+install.packages("ggpubr")
+install.packages("dplyr")
+install.packages("cowplot")
+library(cowplot)
+library(ggplot2)
+library(ggpubr)
+library(dplyr)
+
+Terrestrial_Invertebrates
+
+t.inverts<-Terrestrial_Invertebrates
+t.inverts
+
+t.invertsN<-t.inverts[1:108,]#Extracting terrestrial invertebrates only
+#Only in the Northern plot
+t.invertsN<-cbind(t.invertsN, 
+      Plot=c("Northern"))#Adding a southern Plot column indicating that that these samples are from the North
+t.invertsN
+
+
+t.invertsS<-t.inverts[109:191,]#Extracting terrestrial invertebrates 
+#Only in Southern Plot
+t.invertsS<-cbind(t.invertsS,
+      Plot=c("Southern"))#adding a northern plot column to the dataset indicating that the organism comes from the sorthern plot
+t.invertsS
+
+
+t.inverts<-rbind(t.invertsN, t.invertsS)
+
+#Creating a data frame has quantity of each organism 
+#by taxonomic class and its subsequent order
+t.inverts.class<- data.frame(
+  Phylum=t.inverts$phylum,
+  Class=t.inverts$class,
+  Order=t.inverts$order,
+  Quantity=t.inverts$organismQuantity,
+  Plot=t.inverts$Plot
+)
+
+#plotting a barplot for Invertebrates of Southern Plot vs Northern Plot
+Terrestrial.Invertebrate.plot<-
+  ggplot(t.inverts.class, aes(fill=Order, y=Quantity, x=Plot))+
+  geom_bar(stat = "identity", position= "stack")+
+  labs(x='Plot', 
+       y='Organism Count', 
+       title='Northern vs Southern Terrestrial Invertebrates Abundance and Order Diversity')
+   #geom_text(aes(label = Quantity, group = Order), 
+            #stat="identity",
+            #position = position_stack(vjust = 0.5), 
+            #color = "white", 
+            #size = 3) #I want to add the number of orders in each family
+  #geom_col(position = "dodge") +
+
+Terrestrial.Invertebrate.plot
+
+
+
+```
+
+```{r setup, include=FALSE}
+#Creating a Plot that compares the taxonomic richness of Terrestrial Invertebrates Between North and Southern Plot
+
+
+tax.rich.invertsN<-data.frame(#creating a dataframe 
+  Taxonomic_Group= c("Family", "Genus", "Species"),#creating a column of taxonomic group that includes family, genus and, species level
+  
+  Richness=c(length(unique(t.invertsN$family)),#counting the unique number of families of terrestrial invertebrates
+             length(unique(t.invertsN$genus)),#counting the unique number of genus of terrestrial invertebrates
+             length(unique(t.invertsN$species))),#counting the unique number of species of terrestrial invertebrates
+  
+  Plot="North",
+  stringsAsFactors = FALSE
+)
+
+
+
+tax.rich.invertsS<-data.frame(
+  Taxonomic_Group= c("Family", "Genus", "Species"),#creating a column of taxonomic group that includes family, genus and, species level
+  
+  Richness=c(length(unique(t.invertsS$family)),#counting the unique number of families of terrestrial invertebrates
+  length(unique(t.invertsS$genus)),#counting the unique number of genus of terrestrial invertebrates
+  length(unique(t.invertsS$species))),#counting the unique number of species of terrestrial invertebrates
+  
+  Plot="South",
+  stringsAsFactors = FALSE
+)
+
+
+tax.rich.inverts<-#combining the dataframes into one to show taxonomic richness
+  bind_rows(
+    tax.rich.invertsN,
+    tax.rich.invertsS
+  )
+tax.rich.inverts
+
+
+ggplot(tax.rich.inverts, aes(fill=Plot, x=Taxonomic_Group, y=Richness))+
+  geom_bar(stat = "identity", position= "dodge")+ #the response variable will take in account of the quantity given by the richness column in the data frame.  
+  labs(x='Taxonomic Group', 
+       y='Organism Count', 
+       title='Taxonomic Group Richness of Terrestrial Invertebrates in Southern and Northern Plot')
+#plot comparing the richness of different taxonomic levels between the southern and and northern plot. 
+  
+```
+
+
+
+
+```{r setup, include=FALSE}
+
+#Creating a plot that compares family richness between transects of each plot
+
+
+##Northern Plot##
+H.invertsN<- t.invertsN[1:21,]
+
+#subsetting data gathered from the higher transect of the northern plot via sweep netting 
+
+H.invertsN<-cbind(H.invertsN,              
+                Transect=c("Higher"))#Creating a new column that indicating that the data was sampled at the higher transect
+
+
+L.invertsN<- t.invertsN [22:64,]
+#subsetting data gathered from the lower transect of the northern plot, including both sweepnetting and pitfall trap 
+
+L.invertsN<-cbind(L.invertsN, 
+        Transect=c("Lower"))#Creating a new column that indicating that the data was sampled at the lower transect      
+
+
+
+M.invertsN<- t.invertsN[65:108,]
+  #subsetting data gathered from the lower transect of the northern plot, including both sweepnetting and pitfall trap sampling 
+M.invertsN<-cbind(M.invertsN,            
+                  Transect=c("Middle"))#Creating a new column that indicating that the data was sampled at the lower transect
+
+
+
+#Creating a plot that compares all of the transects with abundance of families in the Northern Plot
+
+plot_transect1 <- ggplot(H.invertsN, aes(x = family, y = organismQuantity, fill = "Higher")) +
+  geom_bar(stat = "identity") +
+  labs(x = NULL, y= NULL, title = 'Higher') +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+        plot.title = element_text(color = "purple")) +  # Set title color to red
+  scale_fill_manual(values = "purple")  # Set fill color to red
+
+plot_transect2 <- ggplot(M.invertsN, aes(x = family, y = organismQuantity, fill = "Middle")) +
+  geom_bar(stat = "identity") +
+  labs(x = NULL, y='Organism Count', title = 'Middle') +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+        plot.title = element_text(color = "blue")) +  # Set title color to green
+  scale_fill_manual(values = "blue")  # Set fill color to green
+
+plot_transect3 <- ggplot(L.invertsN, aes(x = family, y = organismQuantity, fill = "Lower")) +
+  geom_bar(stat = "identity") +
+  labs(x = 'Family', y=NULL, title = 'Lower') +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+        plot.title = element_text(color = "green")) +  # Set title color to blue
+  scale_fill_manual(values = "green")  # Set fill color to blue
+
+# Use plot_grid to arrange the plots vertically
+N.plot.transects<-plot_grid(
+  plot_transect1, plot_transect2, plot_transect3, ncol = 1)
+
+
+N.plot.transects
+```
+
+
+```{r setup, include=FALSE}
+
+
+
+##Southern Plot##
+H.invertsS<- t.invertsS[1:28,]
+
+#subsetting data gathered from the higher transect of the southern plot via sweep netting 
+
+H.invertsS<-cbind(H.invertsS,              
+                  Transect=c("Higher"))#Creating a new column that indicating that the data was sampled at the higher transect
+
+
+L.invertsS<- t.invertsS [29:43,]
+#subsetting data gathered from the lower transect of the southern plot, including both sweepnetting and pitfall trap 
+
+L.invertsS<-cbind(L.invertsS, 
+        Transect=c("Lower"))#Creating a new column that indicating that the data was sampled at the lower transect      
+
+
+
+M.invertsS<- t.invertsS[44:83,]
+  #subsetting data gathered from the lower transect of the southern plot, including both sweepnetting and pitfall trap sampling 
+M.invertsS<-cbind(M.invertsS,            
+                  Transect=c("Middle"))#Creating a new column that indicating that the data was sampled at the lower transect
+
+
+
+#Creating a plot that compares all of the transects with abundance of families in the Southern Plot
+
+
+plot_transects1 <- ggplot(H.invertsS, aes(x = family, y = organismQuantity, fill = "Higher")) +
+  geom_bar(stat = "identity") +
+  labs(x = NULL, y= NULL, title = 'Lower') +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+        plot.title = element_text(color = "red")) +  # Set title color to red
+  scale_fill_manual(values = "red")  # Set fill color to red
+
+plot_transects2 <- ggplot(M.invertsS, aes(x = family, y = organismQuantity, fill = "Middle")) +
+  geom_bar(stat = "identity") +
+  labs(x = NULL, y='Organism Count', title = 'Middle') +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+        plot.title = element_text(color = "orange")) +  # Set title color to green
+  scale_fill_manual(values = "orange")  # Set fill color to green
+
+plot_transects3 <- ggplot(H.invertsS, aes(x = family, y = organismQuantity, fill = "Lower")) +
+  geom_bar(stat = "identity") +
+  labs(x = 'Family', y=NULL, title = 'Higher') +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+        plot.title = element_text(color = "yellow")) +  # Set title color to blue
+  scale_fill_manual(values = "yellow")  # Set fill color to blue
+
+# Use plot_grid to arrange the plots vertically
+S.plot.transects<-plot_grid(
+  plot_transects3, plot_transects2, plot_transects1, ncol = 1)
+
+
+S.plot.transects
+```

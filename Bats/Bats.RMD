@@ -1,0 +1,93 @@
+---
+title: "Bats"
+output: html_document
+date: "2023-11-30"
+---
+
+```{r setup, include=FALSE}
+####Bats Data####
+library(readr)
+library(dplyr)
+library(tidyr)
+install.packages("pheatmap")
+install.packages("heatmaply")
+library(pheatmap)
+
+Bats <- read_csv("Mammals/Bats.csv")
+
+
+N1.Bats <- Bats[1:13, ]#extracting from the bats data frame to only get samples from the woodland in the southern plot for night 1
+N1.Bats<- cbind(N1.Bats,
+                Location= c("South Woodland"))
+
+N2.Bats <- Bats[14:25, ]#extracting from the bats data frame to only get samples from the marsh in the southern plot for night 2
+N2.Bats<- cbind(N2.Bats,
+                Location= c("South Marsh"))
+
+N3.Bats <- Bats[26:30, ]#extracting from the bats data frame to only get samples from the stream in the northern plot for night 3
+N3.Bats<- cbind(N3.Bats,
+                Location= c("North Stream"))
+
+N4.Bats <- Bats[31:43, ]#extracting from the bats data frame to only get samples from the woodland in the northern plot for night 4
+N4.Bats<- cbind(N4.Bats,
+                Location= c("North Woodland"))#adding a column indicating where the location where the sample was taken
+
+Bats<- rbind(N1.Bats,
+      N2.Bats, 
+      N3.Bats, 
+      N4.Bats)
+         #Recombining the night datas into the original data frame
+
+
+
+unique(Bats$scientificName)
+
+
+
+Bats<-Bats[, c("scientificName", "Location")]
+           
+presence_matrix <- Bats %>%
+  mutate(Present = 1) %>%
+  pivot_wider(names_from = Location, values_from = Present, values_fill = 0)
+
+
+
+# Extract species and locations
+species <- presence_matrix$scientificName
+species
+locations <- colnames(presence_matrix)[-1]
+
+# Create a binary matrix
+binary_matrix <- as.matrix(presence_matrix[, -1])
+binary_matrix
+
+
+presence_long <- presence_matrix %>%
+  pivot_longer(cols = -scientificName, names_to = "Location", values_to = "Presence")
+
+
+
+presence_totals <- presence_long %>%
+  group_by(scientificName) %>%
+  summarise(TotalPresence = sum(Presence))
+
+# Merge the total presence information back into the long-format data
+presence_long <- left_join(presence_long, presence_totals, by = "scientificName")
+presence_long
+
+# Create a presence-absence plot using ggplot2
+ggplot(presence_long, aes(x = Location, y = scientificName, fill = as.factor(Presence), alpha = TotalPresence)) +
+  geom_tile(color = "white") +
+  scale_fill_manual(values = c("white", "steelblue", "blue", "darkblue", "purple"), name = "Presence") +
+  labs(title = "Presence-Absence Matrix", x = "Locations", y = "Species") +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  scale_alpha_continuous(range = c(0.5, 20), guide = "none") +
+  geom_tile(data = presence_long %>% filter(Presence == 0), fill = "white", color = "white") +
+  theme(legend.position = "none")
+
+
+
+
+l
+```

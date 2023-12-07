@@ -1,0 +1,79 @@
+---
+title: "Birds_Rmd"
+output: html_document
+date: "2023-11-27"
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(ggplot2)
+
+birds<-Lochranza_Birds
+
+N.birds<-birds[1:19,]
+S.birds<-birds[20:49,]
+
+
+
+N1.birds<-cbind(N.birds[1:5,], 
+      Plot=c("Northern"),
+      Transect=c("Lower"))#Adding a southern Plot column indicating that that these samples are from the North
+N2.birds<-cbind(N.birds[6:9,], 
+      Plot=c("Northern"),
+      Transect=c("Middle"))#Adding a southern Plot column indicating that that these samples are from the North
+N3.birds<-cbind(N.birds[10:13,], 
+      Plot=c("Northern"),
+      Transect=c("Middle"))
+
+
+
+      
+S.birds<-cbind(S.birds,
+      Plot=c("Southern"))
+
+birds<-rbind(N.birds, S.birds)
+
+ggplot(birds, aes(fill=species, y=organismQuantity, x=family))+
+  geom_bar(stat = "identity", position= "stack")+
+  #geom_col(position = "dodge") +
+  labs(x='Family', 
+       y='Organism Count', 
+       title='Northern vs Southern Bird Family Abundance and Species Diversity')+
+    facet_grid(~Plot)+
+    coord_flip()
+
+
+```
+
+```{r setup, include=FALSE}
+plot_transects1 <- ggplot(birds, aes(x = family, y = organismQuantity, fill = "Higher")) +
+  geom_bar(stat = "identity") +
+  labs(x = NULL, y= NULL, title = 'Lower') +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+        plot.title = element_text(color = "red")) +  # Set title color to red
+  scale_fill_manual(values = "red")  # Set fill color to red
+
+plot_transects2 <- ggplot(birds, aes(x = family, y = organismQuantity, fill = "Middle")) +
+  geom_bar(stat = "identity") +
+  labs(x = NULL, y='Organism Count', title = 'Middle') +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+        plot.title = element_text(color = "orange")) +  # Set title color to green
+  scale_fill_manual(values = "orange")  # Set fill color to green
+
+plot_transects3 <- ggplot(birds, aes(x = family, y = organismQuantity, fill = "Lower")) +
+  geom_bar(stat = "identity") +
+  labs(x = 'Family', y=NULL, title = 'Higher') +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 8),
+        plot.title = element_text(color = "yellow")) +  # Set title color to blue
+  scale_fill_manual(values = "yellow")  # Set fill color to blue
+
+# Use plot_grid to arrange the plots vertically
+S.plot.transects<-plot_grid(
+  plot_transects1, plot_transects2, plot_transects3, ncol = 1)
+
+
+S.plot.transects
+
+
+
+```

@@ -1,0 +1,103 @@
+---
+title: "Aquatic Invertebrates"
+output: html_document
+date: "2023-11-30"
+---
+
+
+```{r setup, include=FALSE}
+
+install.packages("ggplot2")
+install.packages("ggpubr")
+install.packages("dplyr")
+install.packages("cowplot")
+library(ggplot2)
+library(ggpubr)
+library(dplyr)
+library(cowplot)
+
+#Creating a Plot that compares the taxonomic richness of Aquatic Invertebrates Between North and Southern Plot
+
+#Creating data frames that only by sampling site
+
+N.stream.inverts<- Aquatic_Invertebrates[1:24, ] #extracting samples from the northern stream
+N.stream.inverts<-cbind(N.stream.inverts, 
+                        Location=c("North Stream"))
+#creating a new column in the data frame by location to indicate the samples came from the north stream
+
+
+S.stream.inverts<-Aquatic_Invertebrates[25:36,]#extracting samples from the southern stream
+S.stream.inverts<-cbind(S.stream.inverts, 
+                        Location=c("South Stream"))
+#creating a new column in the data frame by location to indicate the samples came from the south stream
+
+S.marsh.inverts<-Aquatic_Invertebrates[37:49, ] #extracting samples from the marsh in the southern plot
+S.marsh.inverts<-cbind(S.marsh.inverts, 
+                        Location=c("Marsh"))
+#creating a new column in the data frame by location to indicate the samples came from the south marsh
+
+a.inverts<-rbind(N.stream.inverts, 
+                 S.stream.inverts, 
+                 S.marsh.inverts)
+
+plot_transects1 <- ggplot(N.stream.inverts, aes(x =reorder(order, organismQuantity), y = organismQuantity, fill = "North Stream")) +
+  geom_bar(stat = "identity") +
+  labs(x = NULL, y= NULL, title = 'North Stream') +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust = 0.5, size = 5),
+        plot.title = element_text(color = "purple")) +  # Set title color to red
+  scale_fill_manual(values = "purple")  # Set fill color to red
+
+plot_transects1
+
+plot_transects2 <- ggplot(S.stream.inverts, aes(x =reorder(order, organismQuantity), y = organismQuantity, fill = "South Stream")) +
+  geom_bar(stat = "identity") +
+  labs(x = NULL, y='Organism Count', title = 'South Stream') +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust = 0.5, size = 5),
+        plot.title = element_text(color = "blue")) +  # Set title color to green
+  scale_fill_manual(values = "blue")  # Set fill color to green
+
+plot_transects3 <- ggplot(S.marsh.inverts, aes(x =reorder(order, organismQuantity), y = organismQuantity, fill = "Marsh")) +
+  geom_bar(stat = "identity") +
+  labs(x = 'Order', y=NULL, title = 'Lower') +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust = 0.5, size = 5),
+        plot.title = element_text(color = "green")) +  # Set title color to blue
+  scale_fill_manual(values = "green")  # Set fill color to blue
+
+# Use plot_grid to arrange the plots vertically
+A.plot.transects<-plot_grid(
+  plot_transects1, plot_transects2, plot_transects3, ncol = 1)
+
+A.plot.transects
+
+
+  
+
+
+```
+
+```
+```{r setup, include=FALSE}
+##Water Quality##
+
+
+N.stream.index<-c(4,5,8,10,9,4,5,4,5,8,10,4,5,8)
+#in order to calculate the water quality index for the North Stream, I added up all the scores from the BMWP scores associated with the unique invertebrate family present in our dataset and got the mean. 
+
+mean(N.stream.index) 
+#6.35
+
+S.stream.inverts$family
+S.stream.inverts$order
+S.stream.index<-c(5, 10, 5, 5, )
+mean(S.stream.index) 
+#7.5
+#in order to calculate the water quality index for the South Stream, I added up all the scores from the BMWP scores associated with the unique invertebrate family present in our dataset and got the mean.
+
+unique(S.marsh.inverts$order)
+S.marsh.index<-c(5,5,1,10)
+mean(S.marsh.index) 
+#5.25
+#in order to calculate the water quality index for the South Marsh, I added up all the scores from the BMWP scores associated with the unique invertebrate family present in our dataset and got the mean.
+
+```
+
